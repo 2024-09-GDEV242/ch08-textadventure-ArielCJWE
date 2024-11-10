@@ -1,0 +1,28 @@
+Part 1 
+A level features'
+Commands:
+GO  – The player can go in any direction
+HELP – Gives the player their command options
+QUIT – Stops the game.
+PICK [item] – Allows the player to pick up an item
+DROP [item] – Allows the player to drop an item
+INVENTORY – Allows the player to store multiple items
+
+Rooms:
+
+Multiple rooms with various items for the player to explore
+
+Inventory Management:
+
+Allows the player to hold their items
+
+Room History:
+
+Player can retrace their steps and visit a room they just left
+
+Extra Credit Features:
+
+Player Class for Inventory Management:
+
+Player class to hold the inventory information for the user, thus making the inventory code easily accessible and usable in other classes.
+
