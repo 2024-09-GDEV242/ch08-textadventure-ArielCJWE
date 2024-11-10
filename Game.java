@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 /**
  *  This class is the main class of the "World of Zuul" application. 
  *  "World of Zuul" is a very simple, text based adventure game.  Users 
@@ -11,14 +13,16 @@
  *  rooms, creates the parser and starts the game.  It also evaluates and
  *  executes the commands that the parser returns.
  * 
- * @author  Michael Kölling and David J. Barnes
- * @version 2016.02.29
+ * @author  Ariel Wong-Edwin
+ * @version 2024.11.07
  */
 
 public class Game 
 {
     private Parser parser;
     private Room currentRoom;
+    private Player player;
+    private List<Room> userRoomHistory;
         
     /**
      * Create the game and initialise its internal map.
@@ -27,6 +31,8 @@ public class Game
     {
         createRooms();
         parser = new Parser();
+        player = new Player();
+        userRoomHistory = new ArrayList<>();
     }
 
     /**
@@ -43,6 +49,13 @@ public class Game
         lab = new Room("in a computing lab");
         office = new Room("in the computing admin office");
         
+        //Adding items to the rooms
+        outside.addItems(new Items("A bird's feather", "A bird must have dropped it!", 0.01));
+        theater.addItems(new Items("A half burnt mask", "It looks like someone forgot it after a play", 0.2));
+        pub.addItems(new Items("Half eaten basket of chicken wings", "It looks like someone forgot to eat the rest, Disgusting!", 0.5));
+        lab.addItems(new Items("A broken vial of unknown substance", "Looks dangerous", 0.06));
+        office.addItems(new Items("A bloodied axe", "It has dried blood on it", 3.0));
+
         // initialise room exits
         outside.setExit("east", theater);
         outside.setExit("south", lab);
@@ -118,7 +131,19 @@ public class Game
             case QUIT:
                 wantToQuit = quit(command);
                 break;
-        }
+                
+            case PICK:
+                pickUpItems(command);
+                break;
+                
+            case DROP:
+                dropTheItems(command);
+                break;
+                
+            case BACK:
+                goBack(command);
+                break;
+            }
         return wantToQuit;
     }
 
@@ -159,11 +184,61 @@ public class Game
             System.out.println("There is no door!");
         }
         else {
+            userRoomHistory.add(currentRoom);
             currentRoom = nextRoom;
             System.out.println(currentRoom.getLongDescription());
         }
+        
     }
-
+    
+    private void pickUpItems(Command command) {
+        if (!command.hasSecondWord()) {
+            System.out.println("Huh? What is it you would like to pick up?");
+            return;
+        }
+        String itemName = command.getSecondWord();
+        List<Items> items = currentRoom.getItems();
+        for (Items item : items) {
+            player.addItem(item);
+            currentRoom.removeItems(item);
+            System.out.println("Oh! You've picked up:" + item);
+            return;
+        }
+        
+        System.out.println("The item you requested has not been found!");
+    }
+    private void dropTheItems(Command command) {
+        if (!command.hasSecondWord()) {
+            System.out.println("What!? What is it you would like to drop?");
+            return;
+        }
+        String itemName = command.getSecondWord();
+        if(!player.hasItem(itemName)) {
+            System.out.println("You have nothing but air in your inventory");
+            return;
+        }
+        for (Items item : player.getInventory()) {
+            if (item.getName().equalsIgnoreCase(itemName)){
+            player.removeItem(item);
+            currentRoom.addItems(item);
+            System.out.println("Oh No! You've dropped up:" + item);
+            return;
+        }
+        }
+        
+        System.out.println("The item you requested is no longer in your inventory!");
+    }
+    
+    private void goBack(Command command) {
+        if (userRoomHistory.isEmpty()){
+            System.out.println("You've only just started, there is no going back now!");
+        }
+        else{
+            currentRoom = userRoomHistory.remove(userRoomHistory.size() - 1);
+            System.out.println("You've retraced your steps and ended up in: " + currentRoom.getLongDescription());
+        }
+    }
+    
     /** 
      * "Quit" was entered. Check the rest of the command to see
      * whether we really quit the game.

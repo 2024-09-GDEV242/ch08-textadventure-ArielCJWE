@@ -1,6 +1,9 @@
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.ArrayList;
+
 
 /**
  * Class Room - a room in an adventure game.
@@ -12,14 +15,15 @@ import java.util.Iterator;
  * connected to other rooms via exits.  For each existing exit, the room 
  * stores a reference to the neighboring room.
  * 
- * @author  Michael Kölling and David J. Barnes
- * @version 2016.02.29
+ * @author  Ariel Wong-Edwin
+ * @version 2024.11.04
  */
 
 public class Room 
 {
     private String description;
     private HashMap<String, Room> exits;        // stores exits of this room.
+    private List<Items> items;
 
     /**
      * Create a room described "description". Initially, it has
@@ -31,6 +35,7 @@ public class Room
     {
         this.description = description;
         exits = new HashMap<>();
+        items = new ArrayList<Items>();
     }
 
     /**
@@ -50,8 +55,8 @@ public class Room
     public String getShortDescription()
     {
         return description;
-    }
-
+    }    
+    
     /**
      * Return a description of the room in the form:
      *     You are in the kitchen.
@@ -60,9 +65,48 @@ public class Room
      */
     public String getLongDescription()
     {
-        return "You are " + description + ".\n" + getExitString();
+        StringBuilder longDesc = new StringBuilder("You are" + description +
+        "\nExits: ");
+        for (String direction: exits.keySet()){
+            longDesc.append(direction).append(" ");
+        }
+        longDesc.append("\nItems available in the room: ");
+        if (items.isEmpty()){
+            longDesc.append("Nothing is available for you in this room.");
+            
+        }
+        else{
+            for (Items item: items){
+                longDesc.append("\n-").append(items.toString());
+            }
+        }
+        return longDesc.toString();
+        
     }
-
+    /**
+     * @param Adding an item to the room
+     *
+     */
+    public void addItems(Items item)
+    {
+    items.add(item);
+    }
+    /**
+     * @param removing an item to the room
+     *
+     */
+    public void removeItems(Items item)
+    {
+    items.remove(item);
+    }
+    public boolean containsItem(String itemName){
+        for (Items items : items){
+            if(items.getName().equalsIgnoreCase(itemName)){
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * Return a string describing the room's exits, for example
      * "Exits: north west".
@@ -76,6 +120,10 @@ public class Room
             returnString += " " + exit;
         }
         return returnString;
+    }
+    
+    public List<Items>getItems(){
+        return items;
     }
 
     /**
